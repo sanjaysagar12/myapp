@@ -20,15 +20,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _isLoading = true;
       });
       try {
-        bool success = await ApiService.register(_username, _password);
-        if (success) {
+        Map<String, dynamic> result =
+            await ApiService.register(_username, _password);
+        if (result['success']) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration successful. Please login.')),
+            SnackBar(
+                content: Text(result['message'] ??
+                    'Registration successful. Please login.')),
           );
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration failed. Please try again.')),
+            SnackBar(
+                content: Text(result['message'] ??
+                    'Registration failed. Please try again.')),
           );
         }
       } catch (e) {
@@ -134,7 +139,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onPressed: _isLoading ? null : _submit,
                     child: _isLoading
                         ? CircularProgressIndicator(color: Colors.white)
-                        : Text('Create Account', style: TextStyle(fontSize: 18)),
+                        : Text('Create Account',
+                            style: TextStyle(fontSize: 18)),
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(

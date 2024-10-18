@@ -40,14 +40,28 @@ class ApiService {
   static const String baseUrl = 'https://simplebank.portos.site';
   static String? token;
 
- 
-  static Future<bool> register(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/register'),
-      body: {'username': username, 'password': password},
-    );
+  static Future<Map<String, dynamic>> register(
+      String username, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/register'),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {'username': username, 'password': password},
+      );
 
-    return response.statusCode == 201;
+      final responseBody = json.decode(response.body);
+
+      if (response.statusCode == 201) {
+        return {'success': true, 'message': 'Registration successful'};
+      } else {
+        return {
+          'success': false,
+          'message': responseBody['error'] ?? 'Registration failed'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
   }
 
   static Future<bool> login(String username, String password) async {
@@ -127,6 +141,20 @@ class ApiService {
     }
     throw Exception('Transfer failed: ${response.body}');
   }
+
+  static Future<Map<String, dynamic>> getUserInfo() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/user'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load user information: ${response.body}');
+    }
+  }
+
   static Future<List<dynamic>> getTransactions() async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/transactions'),
